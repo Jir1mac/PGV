@@ -117,26 +117,25 @@
       pop.setAttribute('role', 'dialog');
       pop.setAttribute('aria-modal', 'false');
       pop.innerHTML = `
-        <h3>Přihlášení správce</h3>
-        <div class="admin-row">
-          <label for="admin-pass">Heslo</label>
-          <div style="display:flex;gap:0.5rem;align-items:center">
-            <input id="admin-pass" type="password" aria-label="Admin heslo" />
-            <button id="admin-pass-toggle" class="admin-pass-toggle" type="button" aria-pressed="false" title="Zobrazit/skrýt heslo">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
-          <div class="remember-row"><input id="admin-remember" type="checkbox" /> Zapamatovat přihlášení v této relaci</div>
-          <div id="admin-error" class="admin-error" aria-live="polite"></div>
-        </div>
-        <div class="admin-actions">
-          <button id="admin-cancel" class="btn btn-ghost">Zrušit</button>
-          <button id="admin-submit" class="btn btn-primary">Přihlásit</button>
-        </div>
-      `;
+  <h3>Přihlášení správce</h3>
+  <div class="admin-row">
+    <label for="admin-pass">Heslo</label>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+      <input id="admin-pass" type="password" aria-label="Admin heslo" />
+      <button id="admin-pass-toggle" class="admin-pass-toggle" type="button" aria-pressed="false" title="Zobrazit/skrýt heslo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    <div id="admin-error" class="admin-error" aria-live="polite"></div>
+  </div>
+  <div class="admin-actions">
+    <button id="admin-cancel" class="btn btn-ghost">Zrušit</button>
+    <button id="admin-submit" class="btn btn-primary">Přihlásit</button>
+  </div>
+`;
       headerRight.appendChild(pop);
 
       // wiring popover controls
@@ -144,11 +143,7 @@
       const passToggle = pop.querySelector('#admin-pass-toggle');
       const cancelBtn = pop.querySelector('#admin-cancel');
       const submitBtn = pop.querySelector('#admin-submit');
-      const rememberChk = pop.querySelector('#admin-remember');
       const errEl = pop.querySelector('#admin-error');
-
-      // default the 'remember' checkbox to checked (we will remember automatically in this session)
-      if (rememberChk) rememberChk.checked = true;
 
       passToggle.addEventListener('click', (ev) => {
         ev.stopPropagation();
@@ -166,7 +161,6 @@
         if (pwd === ADMIN_PASSWORD) {
           // IMPORTANT: remember admin automatically for THIS SESSION (sessionStorage)
           sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
-          // keep checkbox but its value is effectively ignored for session-remembering
           errEl.textContent = '';
           hidePopover();
           setAdmin(true);
@@ -307,9 +301,9 @@
         arr.unshift({ name, message, time: new Date().toISOString() });
         if (arr.length>MAX_ENTRIES) arr.length = MAX_ENTRIES;
         const ok = writeEntries(arr);
-        if (!ok){ statusEl.textContent='Chyba při ukládání lokálně.'; statusEl.style.color='crimson'; return; }
+        if (!ok){ statusEl.textContent='Chyba při ukládání vzkazu'; statusEl.style.color='crimson'; return; }
         gbForm.reset(); renderGuestbook();
-        statusEl.textContent='Vzkaz uložen lokálně (demo).'; statusEl.style.color='var(--muted)';
+        statusEl.textContent='Vzkaz odeslán.'; statusEl.style.color='var(--muted)';
         setTimeout(()=>{ statusEl.textContent=''; }, 2500);
       } catch(err){ console.error('guestbook submit error', err); }
     });
