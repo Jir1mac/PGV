@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="cs" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PGV — Domů</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- cache-busting query string; increment when you update styles.css -->
+  <link rel="stylesheet" href="styles.css?v=1" />
+</head>
+<body>
+  <header class="site-header" role="banner">
+    <div class="header-left">
+      <a class="brand" href="index.html">PGV</a>
+    </div>
+
+    <button class="nav-toggle" aria-expanded="false" aria-controls="main-nav" aria-label="Otevřít navigaci">
+      <span class="hamburger" aria-hidden="true"></span>
+    </button>
+
+    <nav id="main-nav" class="header-center" role="navigation" aria-label="Hlavní navigace">
+      <ul class="nav-list">
+        <li><a href="index.html">Domů</a></li>
+        <li><a href="clanky.html">Články</a></li>
+        <li><a href="videa.html">Videa</a></li>
+        <li><a href="odkazy.html">Odkazy</a></li>
+        <li><a href="vzkazy.html">Vzkazy</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-right">
+      <button class="theme-toggle" aria-pressed="false" aria-label="Přepnout tmavý režim">
+        <span class="sun">☀️</span>
+        <span class="moon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero s vaším obrázkem (uložte ho jako hero.jpg do stejné složky) -->
+    <section class="hero hero-paraglide hero-tall" aria-label="Hero">
+      <div class="hero-top-overlay" aria-hidden="true"></div>
+      <div class="hero-bottom-fade" aria-hidden="true"></div>
+
+      <div class="container hero-inner">
+        <div class="hero-content">
+          <h1>PGV — Novinky, články a videa</h1>
+          <p class="lead">Aktuální zprávy a inspirativní čtení. Prohlédněte si články a videa z pohodlí domova.</p>
+          <!-- hero buttons: primary + secondary (secondary now styled like primary) -->
+          <div class="hero-ctas">
+            <a class="btn btn-primary" href="clanky.html">Prozkoumat články</a>
+            <a class="btn btn-secondary" href="videa.html">Nejnovější videa</a>
+        <div class="hero-card hero-card-empty" aria-hidden="true"></div>
+      </div> <!-- .hero-inner -->
+    </section>
+
+    <section class="container two-col">
+      <div class="main-col">
+        <div class="section-head">
+          <h2>Poslední články</h2>
+          <a href="clanky.html" class="link-more">Všechny články →</a>
+        </div>
+
+        <div class="card-grid" id="articles">
+          <!-- dva články -->
+          <article class="card" data-title="Jak funguje PGV" data-tags="novinky">
+            <img src="https://images.unsplash.com/photo-1508833625015-6b5097f83b4a?q=80&w=800&auto=format&fit=crop" alt="Ilustrační obrázek" />
+            <div class="card-body">
+              <h3 class="card-title"><a href="#">Jak funguje PGV: průvodce</a></h3>
+              <p class="card-excerpt">Krátké shrnutí článku — co od něj očekávat, proč je důležitý a co se dozvíte.</p>
+              <div class="card-meta">
+                <span>12. 10. 2025</span>
+                <a class="read-more" href="#">Číst dál →</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card" data-title="Tipy pro bezpečnost" data-tags="bezpečnost">
+            <img src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed2a?q=80&w=800&auto=format&fit=crop" alt="Ilustrační obrázek" />
+            <div class="card-body">
+              <h3 class="card-title"><a href="#">10 tipů pro bezpečnost</a></h3>
+              <p class="card-excerpt">Praktické rady, jak zlepšit bezpečnost při používání služeb online.</p>
+              <div class="card-meta">
+                <span>01. 09. 2025</span>
+                <a class="read-more" href="#">Číst dál →</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <aside class="side-col" aria-label="Boční panel">
+        <div class="card side-card">
+          <h4>Poslední vzkazy</h4>
+          <ul class="mini-list" id="recent-guestbook">
+            <li>Jana: Díky za obsah!</li>
+            <li>Petr: Super stránky.</li>
+          </ul>
+        </div>
+
+        <div class="card side-card">
+          <h4>Přispěj i svým článkem</h4>
+          <p class="muted">novak@seto.cz</p>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <a class="brand footer-brand" href="index.html">PGV</a>
+        <p class="muted">Vlastovy stránky — přehledně a moderně.</p>
+      </div>
+
+      <div class="footer-col">
+        <h4>Odkazy</h4>
+        <ul class="footer-links">
+          <li><a href="clanky.html">Články</a></li>
+          <li><a href="odkazy.html">Užitečné odkazy</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Kontakt</h4>
+        <address>
+          <div>novak@seto.cz</div>
+          <div>Telefon: +420 608 720 672</div>
+        </address>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>Vytvořil <a href="https://jiri-macal.web.educhem.it/" target="_blank" rel="noopener">Jiří Macal</a></p>
+      <p>&copy; PGV • Všechna práva vyhrazena</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
