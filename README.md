@@ -12,7 +12,7 @@ This is a modern website built with Next.js framework.
 - Video gallery with YouTube embeds
 - Admin authentication 
 
-## Pages
+## Pages 
 
 - `/` - Home page with hero section and recent articles
 - `/clanky` - Articles page
