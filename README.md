@@ -8,7 +8,7 @@ Soubory v balíku:
 - odkazy.html
 - styles.css
 - script.js
-- (přidejte) hero.jpg — obrázek pro hero (nahrané uživatelem)
+- (přidejte) hero.jpg — obrázek pro hero (nahrané uživatelem) 
 
 Rychlý návod:
 1. Vytvořte složku (např. `pgv-frontend`) a uložte do ní všechny výše uvedené soubory.
