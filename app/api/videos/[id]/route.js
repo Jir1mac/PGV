@@ -5,6 +5,13 @@ export async function DELETE(request, { params }) {
   try {
     const id = parseInt(params.id)
     
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Neplatné ID videa' },
+        { status: 400 }
+      )
+    }
+    
     await prisma.video.delete({
       where: { id }
     })
@@ -22,6 +29,14 @@ export async function DELETE(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     const id = parseInt(params.id)
+    
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Neplatné ID videa' },
+        { status: 400 }
+      )
+    }
+    
     const { title, url } = await request.json()
 
     const video = await prisma.video.update({

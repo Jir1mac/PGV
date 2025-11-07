@@ -5,6 +5,13 @@ export async function DELETE(request, { params }) {
   try {
     const id = parseInt(params.id)
     
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Neplatné ID článku' },
+        { status: 400 }
+      )
+    }
+    
     await prisma.article.delete({
       where: { id }
     })
@@ -22,6 +29,14 @@ export async function DELETE(request, { params }) {
 export async function PUT(request, { params }) {
   try {
     const id = parseInt(params.id)
+    
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Neplatné ID článku' },
+        { status: 400 }
+      )
+    }
+    
     const { title, content, excerpt, imageUrl } = await request.json()
 
     const article = await prisma.article.update({

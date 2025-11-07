@@ -7,6 +7,8 @@ async function main() {
   console.log('Starting database seed...')
 
   // Create admin user with password from environment variable or default
+  // IMPORTANT: Always set ADMIN_PASSWORD environment variable in production!
+  // The default password below is only for development/testing purposes.
   const adminPassword = process.env.ADMIN_PASSWORD || 'PGVlasta'
   const hashedPassword = await bcrypt.hash(adminPassword, 10)
   
@@ -21,7 +23,8 @@ async function main() {
 
   console.log('Admin user created:', admin.username)
   if (!process.env.ADMIN_PASSWORD) {
-    console.log('⚠️  Using default password "PGVlasta". Set ADMIN_PASSWORD environment variable to use a custom password.')
+    console.log('⚠️  WARNING: Using default password "PGVlasta" for development.')
+    console.log('⚠️  For production, set ADMIN_PASSWORD environment variable to use a secure password.')
   }
 
   // Add some sample videos (optional)

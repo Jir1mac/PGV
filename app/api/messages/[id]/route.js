@@ -5,6 +5,13 @@ export async function DELETE(request, { params }) {
   try {
     const id = parseInt(params.id)
     
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Neplatné ID vzkazu' },
+        { status: 400 }
+      )
+    }
+    
     await prisma.message.delete({
       where: { id }
     })
