@@ -18,7 +18,7 @@ PGV/
 ├── styles.css
 ├── script.js
 ├── video-json.js
-└── hero.jpg
+└── hero.jpg 
 ```
 
 **After:**
