@@ -6,8 +6,9 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('Starting database seed...')
 
-  // Create admin user
-  const hashedPassword = await bcrypt.hash('PGVlasta', 10)
+  // Create admin user with password from environment variable or default
+  const adminPassword = process.env.ADMIN_PASSWORD || 'PGVlasta'
+  const hashedPassword = await bcrypt.hash(adminPassword, 10)
   
   const admin = await prisma.admin.upsert({
     where: { username: 'admin' },
@@ -19,6 +20,9 @@ async function main() {
   })
 
   console.log('Admin user created:', admin.username)
+  if (!process.env.ADMIN_PASSWORD) {
+    console.log('⚠️  Using default password "PGVlasta". Set ADMIN_PASSWORD environment variable to use a custom password.')
+  }
 
   // Add some sample videos (optional)
   const video1 = await prisma.video.upsert({

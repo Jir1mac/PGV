@@ -18,9 +18,14 @@ This application uses PostgreSQL (Neon) database with Prisma ORM.
    npm run db:seed
    ```
    This will create:
-   - Admin user (username: `admin`, password: `PGVlasta`)
+   - Admin user (username: `admin`, password: `PGVlasta` by default)
    - Sample video
    - Sample article
+   
+   **Security Note**: To use a custom admin password, set the `ADMIN_PASSWORD` environment variable before seeding:
+   ```bash
+   ADMIN_PASSWORD="your-secure-password" npm run db:seed
+   ```
 
 ## Database Schema
 
