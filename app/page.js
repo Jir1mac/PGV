@@ -80,7 +80,7 @@ export default function Home() {
                         <Link href={`/clanky#${article.id}`}>{article.title}</Link>
                       </h3>
                       <p className="card-excerpt">
-                        {article.excerpt || article.content.slice(0, 120) + '...'}
+                        {article.excerpt || (article.content ? article.content.slice(0, 120) + '...' : '')}
                       </p>
                       <div className="card-meta">
                         <span>{new Date(article.createdAt).toLocaleDateString('cs-CZ')}</span>
