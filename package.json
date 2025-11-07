@@ -1,13 +1,1 @@
-{
-  "name": "pgv",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "vercel dev"
-  },
-  "dependencies": {
-    "express": "^4.21.0",
-    "serverless-http": "^3.2.0"
-  }
-}
+Next.js + PostgreSQL: add DB-backed auth and CRUD for videos/articles/messages; admin in DB
