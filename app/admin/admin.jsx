@@ -1,128 +1,84 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
-export default function Header() {
-  const pathname = usePathname()
+export default function AdminLogin() {
   const router = useRouter()
 
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [theme, setTheme] = useState('light')
-
+  const ADMIN_PASSWORD = 'PGVlasta'
   const ADMIN_SESSION_KEY = 'pgv-admin'
-  const THEME_KEY = 'pgv-theme'
+
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check admin status
-    const adminStatus = sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true'
-    setIsAdmin(adminStatus)
-
-    // Initialize theme
-    const savedTheme = localStorage.getItem(THEME_KEY)
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      setTheme(savedTheme)
-      document.documentElement.setAttribute('data-theme', savedTheme)
+    const logged = sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true'
+    if (logged) {
+      router.replace('/admin/dashboard')
     } else {
-      const prefersDark =
-        window.matchMedia &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches
-      const initialTheme = prefersDark ? 'dark' : 'light'
-      setTheme(initialTheme)
-      document.documentElement.setAttribute('data-theme', initialTheme)
+      setLoading(false)
     }
   }, [])
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light'
-    setTheme(newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
-    localStorage.setItem(THEME_KEY, newTheme)
+  const handleSubmit = (e) => {
+    e.preventDefault()
+
+    if (password === ADMIN_PASSWORD) {
+      sessionStorage.setItem(ADMIN_SESSION_KEY, 'true')
+      router.push('/admin/dashboard')
+    } else {
+      setError('Nesprávné heslo.')
+    }
   }
 
-  const navItems = [
-    { href: '/', label: 'Domů' },
-    { href: '/clanky', label: 'Články' },
-    { href: '/videa', label: 'Videa' },
-    { href: '/odkazy', label: 'Odkazy' },
-    { href: '/vzkazy', label: 'Vzkazy' },
-  ]
+  if (loading) return null
 
   return (
-    <header className="site-header" role="banner">
-      <div className="header-left">
-        <Link className="brand" href="/">PGV</Link>
-      </div>
+    <div style={{
+      maxWidth: '380px',
+      margin: '4rem auto',
+      padding: '2rem',
+      border: '1px solid var(--border-color)',
+      borderRadius: '12px'
+    }}>
+      <h1>Přihlášení admin</h1>
 
-      <button 
-        className="nav-toggle" 
-        aria-expanded="false" 
-        aria-controls="main-nav" 
-        aria-label="Otevřít navigaci"
-      >
-        <span className="hamburger" aria-hidden="true"></span>
-      </button>
+      <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
+        <label htmlFor="admin-pass">Heslo</label>
+        <div style={{ display: 'flex', gap: '.5rem', marginTop: '.3rem' }}>
+          <input
+            id="admin-pass"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoFocus
+            style={{ flex: 1 }}
+          />
 
-      <nav id="main-nav" className="header-center" role="navigation" aria-label="Hlavní navigace">
-        <ul className="nav-list">
-          {navItems.map((item) => (
-            <li key={item.href}>
-              <Link 
-                href={item.href}
-                aria-current={pathname === item.href ? 'page' : undefined}
-              >
-                {item.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      <div className="header-right">
-        <button 
-          className={`theme-admin-btn ${isAdmin ? 'admin-on' : ''}`}
-          type="button"
-          aria-label="Přepnout motiv / administrace"
-          title="Motiv / Admin"
-          onClick={(e) => {
-            if (!e.target.closest('.admin-icon')) {
-              toggleTheme()
-            }
-          }}
-        >
-          <span className="ta-icon" aria-hidden="true">
-            {theme === 'dark' ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42M12 7a5 5 0 100 10 5 5 0 000-10z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
-          </span>
-
-          {/* ADMIN ICON */}
-          <span 
-            className="admin-icon"
-            role="button"
-            tabIndex="0"
-            aria-label="Admin"
-            title="Admin"
-            onClick={(e) => {
-              e.stopPropagation()
-              router.push('/admin')
-            }}
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label="Zobrazit / skrýt heslo"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M4 20c0-3.314 2.686-6 6-6h4c3.314 0 6 2.686 6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </span>
+            👁
+          </button>
+        </div>
 
+        {error && (
+          <div style={{ marginTop: '.5rem', color: 'red' }}>{error}</div>
+        )}
+
+        <button
+          type="submit"
+          className="btn btn-primary"
+          style={{ marginTop: '1rem' }}
+        >
+          Přihlásit
         </button>
-      </div>
-    </header>
+      </form>
+    </div>
   )
 }
