@@ -10,7 +10,7 @@ This is a modern website built with Next.js framework.
 - Responsive design
 - Guestbook functionality (localStorage)
 - Video gallery with YouTube embeds
-- Admin authentication
+- Admin authentication 
 
 ## Pages
 
