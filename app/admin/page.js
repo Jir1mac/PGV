@@ -6,25 +6,40 @@ import { useRouter } from 'next/navigation'
 export default function AdminLogin() {
   const router = useRouter()
   const ADMIN_SESSION_KEY = 'pgv-admin'
-  const ADMIN_PASSWORD = 'PGVlasta'
 
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [show, setShow] = useState(false)
 
   useEffect(() => {
-    if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
+    if (sessionStorage.getItem(ADMIN_SESSION_KEY)) {
       router.replace('/admin/dashboard')
     }
-  }, [])
+  }, [router])
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault()
-    if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(ADMIN_SESSION_KEY, 'true')
-      router.push('/admin/dashboard')
-    } else {
-      setError('Nesprávné heslo.')
+    setError('')
+    
+    try {
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(data.admin))
+        router.push('/admin/dashboard')
+      } else {
+        setError(data.error || 'Nesprávné přihlašovací údaje')
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Chyba při přihlašování')
     }
   }
 
@@ -34,13 +49,21 @@ export default function AdminLogin() {
         <h1>Přihlášení admin</h1>
 
         <form onSubmit={submit} className="admin-form">
-          <label>Heslo</label>
+          <label>Uživatelské jméno</label>
+          <input
+            type="text"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            required
+          />
 
+          <label>Heslo</label>
           <div className="admin-input-wrap">
             <input
               type={show ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
+              required
             />
 
             <button
@@ -60,6 +83,7 @@ export default function AdminLogin() {
               type="button"
               className="btn-ghost"
               onClick={() => {
+                setUsername('')
                 setPassword('')
                 setError('')
               }}
