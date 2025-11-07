@@ -32,40 +32,50 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="admin-container">
-      <div className="admin-card" style={{ maxWidth: '800px' }}>
-        <h1>Admin Dashboard</h1>
-        <p className="admin-subtext">Vítej, {admin.username}!</p>
+    <div className="admin-container" style={{ maxWidth: '900px' }}>
+      <div className="admin-card" style={{ maxWidth: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <h1 style={{ marginBottom: '0.5rem', fontSize: '2rem' }}>Admin Dashboard</h1>
+          <p className="admin-subtext">Vítej, {admin.username}! 👋</p>
+        </div>
 
-        <div style={{ marginTop: '2rem', display: 'grid', gap: '1rem' }}>
+        <div style={{ 
+          marginTop: '2rem', 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '1.5rem' 
+        }}>
           <Link 
             href="/admin/dashboard/videos" 
-            className="btn-primary"
-            style={{ textAlign: 'center', display: 'block', padding: '1rem' }}
+            className="admin-dashboard-card"
           >
-            Správa videí
+            <div className="admin-dashboard-icon">🎥</div>
+            <h3>Správa videí</h3>
+            <p>Spravujte video obsah</p>
           </Link>
           
           <Link 
             href="/admin/dashboard/articles" 
-            className="btn-primary"
-            style={{ textAlign: 'center', display: 'block', padding: '1rem' }}
+            className="admin-dashboard-card"
           >
-            Správa článků
+            <div className="admin-dashboard-icon">📝</div>
+            <h3>Správa článků</h3>
+            <p>Vytvářejte a upravujte články</p>
           </Link>
           
           <Link 
             href="/admin/dashboard/messages" 
-            className="btn-primary"
-            style={{ textAlign: 'center', display: 'block', padding: '1rem' }}
+            className="admin-dashboard-card"
           >
-            Správa vzkazů
+            <div className="admin-dashboard-icon">💬</div>
+            <h3>Správa vzkazů</h3>
+            <p>Prohlížejte zprávy návštěvníků</p>
           </Link>
         </div>
 
-        <div className="admin-actions" style={{ marginTop: '2rem' }}>
+        <div className="admin-actions" style={{ marginTop: '3rem', justifyContent: 'center' }}>
           <button className="btn-ghost" onClick={handleLogout}>
-            Odhlásit
+            Odhlásit se
           </button>
         </div>
       </div>

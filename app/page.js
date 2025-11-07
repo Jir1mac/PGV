@@ -7,6 +7,8 @@ import Layout from '../components/Layout'
 
 export default function Home() {
   const [recentGuestbook, setRecentGuestbook] = useState([])
+  const [articles, setArticles] = useState([])
+  const [loadingArticles, setLoadingArticles] = useState(true)
 
   useEffect(() => {
     // Load recent guestbook entries
@@ -17,6 +19,22 @@ export default function Home() {
     } catch (e) {
       console.error('Error loading guestbook', e)
     }
+
+    // Load articles from API
+    const loadArticles = async () => {
+      try {
+        const res = await fetch('/api/articles')
+        if (res.ok) {
+          const data = await res.json()
+          setArticles(data.slice(0, 6)) // Get latest 6 articles
+        }
+      } catch (err) {
+        console.error('Error loading articles:', err)
+      } finally {
+        setLoadingArticles(false)
+      }
+    }
+    loadArticles()
   }, [])
 
   return (
@@ -47,29 +65,31 @@ export default function Home() {
             </div>
 
             <div className="card-grid" id="articles">
-              <article className="card" data-title="Jak funguje PGV" data-tags="novinky">
-                <img src="https://images.unsplash.com/photo-1508833625015-6b5097f83b4a?q=80&w=800&auto=format&fit=crop" alt="Ilustrační obrázek" />
-                <div className="card-body">
-                  <h3 className="card-title"><Link href="#">Jak funguje PGV: průvodce</Link></h3>
-                  <p className="card-excerpt">Krátké shrnutí článku — co od něj očekávat, proč je důležitý a co se dozvíte.</p>
-                  <div className="card-meta">
-                    <span>12. 10. 2025</span>
-                    <Link className="read-more" href="#">Číst dál →</Link>
-                  </div>
-                </div>
-              </article>
-
-              <article className="card" data-title="Tipy pro bezpečnost" data-tags="bezpečnost">
-                <img src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed2a?q=80&w=800&auto=format&fit=crop" alt="Ilustrační obrázek" />
-                <div className="card-body">
-                  <h3 className="card-title"><Link href="#">10 tipů pro bezpečnost</Link></h3>
-                  <p className="card-excerpt">Praktické rady, jak zlepšit bezpečnost při používání služeb online.</p>
-                  <div className="card-meta">
-                    <span>01. 09. 2025</span>
-                    <Link className="read-more" href="#">Číst dál →</Link>
-                  </div>
-                </div>
-              </article>
+              {loadingArticles ? (
+                <p>Načítám články...</p>
+              ) : articles.length === 0 ? (
+                <p>Zatím žádné články.</p>
+              ) : (
+                articles.map((article) => (
+                  <article key={article.id} className="card">
+                    {article.imageUrl && (
+                      <img src={article.imageUrl} alt={article.title} />
+                    )}
+                    <div className="card-body">
+                      <h3 className="card-title">
+                        <Link href={`/clanky#${article.id}`}>{article.title}</Link>
+                      </h3>
+                      <p className="card-excerpt">
+                        {article.excerpt || (article.content ? article.content.slice(0, 120) + '...' : '')}
+                      </p>
+                      <div className="card-meta">
+                        <span>{new Date(article.createdAt).toLocaleDateString('cs-CZ')}</span>
+                        <Link className="read-more" href={`/clanky#${article.id}`}>Číst dál →</Link>
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
             </div>
           </div>
 
