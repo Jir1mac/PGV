@@ -1,19 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
 export default function Header() {
   const pathname = usePathname()
+  const router = useRouter()
+
   const [isAdmin, setIsAdmin] = useState(false)
-  const [showPopover, setShowPopover] = useState(false)
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
   const [theme, setTheme] = useState('light')
 
-  const ADMIN_PASSWORD = 'PGVlasta'
   const ADMIN_SESSION_KEY = 'pgv-admin'
   const THEME_KEY = 'pgv-theme'
 
@@ -28,7 +25,9 @@ export default function Header() {
       setTheme(savedTheme)
       document.documentElement.setAttribute('data-theme', savedTheme)
     } else {
-      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+      const prefersDark =
+        window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches
       const initialTheme = prefersDark ? 'dark' : 'light'
       setTheme(initialTheme)
       document.documentElement.setAttribute('data-theme', initialTheme)
@@ -40,22 +39,6 @@ export default function Header() {
     setTheme(newTheme)
     document.documentElement.setAttribute('data-theme', newTheme)
     localStorage.setItem(THEME_KEY, newTheme)
-  }
-
-  const handleAdminSubmit = (e) => {
-    e.preventDefault()
-    if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(ADMIN_SESSION_KEY, 'true')
-      setIsAdmin(true)
-      setShowPopover(false)
-      setPassword('')
-      setError('')
-      // Show success message instead of alert
-      setError('✓ Přihlášení úspěšné')
-      setTimeout(() => setError(''), 2000)
-    } else {
-      setError('Nesprávné heslo.')
-    }
   }
 
   const navItems = [
@@ -119,6 +102,8 @@ export default function Header() {
               </svg>
             )}
           </span>
+
+          {/* ADMIN ICON */}
           <span 
             className="admin-icon"
             role="button"
@@ -127,7 +112,7 @@ export default function Header() {
             title="Admin"
             onClick={(e) => {
               e.stopPropagation()
-              setShowPopover(!showPopover)
+              router.push('/admin')
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -135,55 +120,8 @@ export default function Header() {
               <path d="M4 20c0-3.314 2.686-6 6-6h4c3.314 0 6 2.686 6 6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </span>
-        </button>
 
-        {showPopover && (
-          <div className="admin-popover open" role="dialog" aria-modal="false">
-            <h3>Přihlášení správce</h3>
-            <form onSubmit={handleAdminSubmit}>
-              <div className="admin-row">
-                <label htmlFor="admin-pass">Heslo</label>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <input 
-                    id="admin-pass" 
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    aria-label="Admin heslo"
-                  />
-                  <button 
-                    id="admin-pass-toggle"
-                    className="admin-pass-toggle"
-                    type="button"
-                    aria-pressed={showPassword}
-                    title="Zobrazit/skrýt heslo"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <path d="M12 5C7 5 2.73 8.11 1 12c1.73 3.89 6 7 11 7s9.27-3.11 11-7c-1.73-3.89-6-7-11-7z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                </div>
-                {error && <div id="admin-error" className="admin-error" aria-live="polite">{error}</div>}
-              </div>
-              <div className="admin-actions">
-                <button 
-                  type="button"
-                  className="btn btn-ghost"
-                  onClick={() => {
-                    setShowPopover(false)
-                    setPassword('')
-                    setError('')
-                  }}
-                >
-                  Zrušit
-                </button>
-                <button type="submit" className="btn btn-primary">Přihlásit</button>
-              </div>
-            </form>
-          </div>
-        )}
+        </button>
       </div>
     </header>
   )
