@@ -1,6 +1,21 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+
+// Hardcoded admin credentials
+// NOTE: For production use, consider moving these to environment variables
+const ADMIN_USERNAME = 'admin'
+const ADMIN_PASSWORD = 'PGVlasta'
+
+// Constant-time string comparison to prevent timing attacks
+function timingSafeEqual(a, b) {
+  if (a.length !== b.length) {
+    return false
+  }
+  let result = 0
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i)
+  }
+  return result === 0
+}
 
 export async function POST(request) {
   try {
@@ -13,20 +28,11 @@ export async function POST(request) {
       )
     }
 
-    const admin = await prisma.admin.findUnique({
-      where: { username }
-    })
+    // Check against hardcoded credentials using constant-time comparison
+    const usernameValid = timingSafeEqual(username, ADMIN_USERNAME)
+    const passwordValid = timingSafeEqual(password, ADMIN_PASSWORD)
 
-    if (!admin) {
-      return NextResponse.json(
-        { error: 'Nesprávné přihlašovací údaje' },
-        { status: 401 }
-      )
-    }
-
-    const validPassword = await bcrypt.compare(password, admin.password)
-
-    if (!validPassword) {
+    if (!usernameValid || !passwordValid) {
       return NextResponse.json(
         { error: 'Nesprávné přihlašovací údaje' },
         { status: 401 }
@@ -36,8 +42,8 @@ export async function POST(request) {
     return NextResponse.json({ 
       success: true,
       admin: {
-        id: admin.id,
-        username: admin.username
+        id: 1,
+        username: username
       }
     })
   } catch (error) {
