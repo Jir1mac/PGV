@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import Layout from '../../components/Layout'
 
-const GB_KEY = 'pgv-guestbook'
-const MAX_ENTRIES = 200
 const MAX_NAME_LEN = 80
 const MAX_MSG_LEN = 2000
 const ADMIN_SESSION_KEY = 'pgv-admin'
@@ -15,37 +13,30 @@ export default function Vzkazy() {
   const [message, setMessage] = useState('')
   const [status, setStatus] = useState('')
   const [isAdmin, setIsAdmin] = useState(false)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadEntries()
-    const adminStatus = sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true'
-    setIsAdmin(adminStatus)
+    const adminData = sessionStorage.getItem(ADMIN_SESSION_KEY)
+    setIsAdmin(!!adminData)
   }, [])
 
-  const loadEntries = () => {
+  const loadEntries = async () => {
     try {
-      const raw = localStorage.getItem(GB_KEY)
-      const parsed = JSON.parse(raw || '[]')
-      setEntries(Array.isArray(parsed) ? parsed : [])
+      const res = await fetch('/api/messages', { cache: 'no-store' })
+      if (res.ok) {
+        const data = await res.json()
+        setEntries(Array.isArray(data) ? data : [])
+      }
     } catch (e) {
-      console.error('Error loading guestbook', e)
+      console.error('Error loading messages', e)
       setEntries([])
+    } finally {
+      setLoading(false)
     }
   }
 
-  const saveEntries = (newEntries) => {
-    try {
-      if (!Array.isArray(newEntries)) newEntries = []
-      if (newEntries.length > MAX_ENTRIES) newEntries = newEntries.slice(0, MAX_ENTRIES)
-      localStorage.setItem(GB_KEY, JSON.stringify(newEntries))
-      return true
-    } catch (e) {
-      console.error('Cannot save guestbook', e)
-      return false
-    }
-  }
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     const trimmedName = name.trim().slice(0, MAX_NAME_LEN)
@@ -56,34 +47,36 @@ export default function Vzkazy() {
       return
     }
 
-    const newEntries = [...entries]
-    newEntries.unshift({
-      name: trimmedName,
-      message: trimmedMessage,
-      time: new Date().toISOString()
-    })
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: trimmedName,
+          message: trimmedMessage
+        })
+      })
 
-    if (newEntries.length > MAX_ENTRIES) {
-      newEntries.length = MAX_ENTRIES
-    }
-
-    const ok = saveEntries(newEntries)
-    if (!ok) {
+      if (res.ok) {
+        setName('')
+        setMessage('')
+        setStatus('Vzkaz odeslán.')
+        loadEntries()
+        
+        setTimeout(() => {
+          setStatus('')
+        }, 2500)
+      } else {
+        const data = await res.json()
+        setStatus(data.error || 'Chyba při ukládání vzkazu')
+      }
+    } catch (err) {
+      console.error('Error submitting message:', err)
       setStatus('Chyba při ukládání vzkazu')
-      return
     }
-
-    setEntries(newEntries)
-    setName('')
-    setMessage('')
-    setStatus('Vzkaz odeslán.')
-
-    setTimeout(() => {
-      setStatus('')
-    }, 2500)
   }
 
-  const handleDelete = (index) => {
+  const handleDelete = async (id) => {
     if (!isAdmin) {
       setStatus('Pro smazání vzkazu se přihlaste jako admin.')
       setTimeout(() => setStatus(''), 3000)
@@ -92,10 +85,15 @@ export default function Vzkazy() {
 
     if (!confirm('Opravdu smazat tento vzkaz?')) return
 
-    const newEntries = [...entries]
-    newEntries.splice(index, 1)
-    saveEntries(newEntries)
-    setEntries(newEntries)
+    try {
+      const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        loadEntries()
+      }
+    } catch (err) {
+      console.error('Error deleting message:', err)
+      setStatus('Chyba při mazání vzkazu')
+    }
   }
 
   return (
@@ -150,35 +148,39 @@ export default function Vzkazy() {
 
         <section>
           <h2>Poslední vzkazy</h2>
-          <ul id="guestbook-list" className="guestbook-list">
-            {entries.map((entry, index) => {
-              const when = entry.time ? new Date(entry.time).toLocaleString() : ''
-              return (
-                <li key={index}>
-                  <strong>{entry.name}</strong> <span className="muted">— {when}</span>
-                  <div>{entry.message}</div>
-                  {isAdmin && (
-                    <button 
-                      className="gb-delete"
-                      onClick={() => handleDelete(index)}
-                      aria-label="Smazat vzkaz"
-                      style={{
-                        marginLeft: '0.5rem',
-                        padding: '0.25rem 0.45rem',
-                        borderRadius: '6px',
-                        border: '1px solid rgba(255,80,80,0.12)',
-                        background: 'transparent',
-                        color: 'inherit',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Smazat
-                    </button>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
+          {loading ? (
+            <p>Načítám...</p>
+          ) : (
+            <ul id="guestbook-list" className="guestbook-list">
+              {entries.map((entry) => {
+                const when = entry.createdAt ? new Date(entry.createdAt).toLocaleString('cs-CZ') : ''
+                return (
+                  <li key={entry.id}>
+                    <strong>{entry.name}</strong> <span className="muted">— {when}</span>
+                    <div>{entry.message}</div>
+                    {isAdmin && (
+                      <button 
+                        className="gb-delete"
+                        onClick={() => handleDelete(entry.id)}
+                        aria-label="Smazat vzkaz"
+                        style={{
+                          marginLeft: '0.5rem',
+                          padding: '0.25rem 0.45rem',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(255,80,80,0.12)',
+                          background: 'transparent',
+                          color: 'inherit',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Smazat
+                      </button>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </section>
       </main>
     </Layout>

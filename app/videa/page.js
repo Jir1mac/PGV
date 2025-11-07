@@ -14,11 +14,10 @@ export default function Videa() {
 
   const loadVideos = async () => {
     try {
-      const res = await fetch('/videos.json', { cache: 'no-store' })
-      if (!res.ok) throw new Error('videos.json nenalezen (HTTP ' + res.status + ')')
+      const res = await fetch('/api/videos', { cache: 'no-store' })
+      if (!res.ok) throw new Error('Chyba při načítání videí (HTTP ' + res.status + ')')
       const data = await res.json()
-      const items = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : [])
-      setVideos(items)
+      setVideos(Array.isArray(data) ? data : [])
       setLoading(false)
     } catch (err) {
       console.error(err)
@@ -37,7 +36,7 @@ export default function Videa() {
 
   const createVideoCard = (item, index) => {
     const title = item.title || 'YouTube video'
-    const id = getYouTubeId(item.url || item.src || '')
+    const id = getYouTubeId(item.url || '')
     
     return (
       <div key={index} className="video-card">
@@ -49,28 +48,12 @@ export default function Videa() {
             allowFullScreen
             title={title}
           />
-        ) : item.embed ? (
-          // Parse the embed code to extract iframe src safely instead of using dangerouslySetInnerHTML
-          <iframe
-            src={extractIframeSrc(item.embed)}
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title={title}
-          />
         ) : (
           <div style={{ padding: '36% 0', background: '#111' }}></div>
         )}
         <div className="video-title">{title}</div>
       </div>
     )
-  }
-
-  const extractIframeSrc = (embedCode) => {
-    if (!embedCode) return ''
-    // Safely extract src from iframe tag
-    const match = embedCode.match(/src=["']([^"']+)["']/)
-    return match ? match[1] : ''
   }
 
   return (
