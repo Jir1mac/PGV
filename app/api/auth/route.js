@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
+
+// Hardcoded admin credentials
+const ADMIN_USERNAME = 'admin'
+const ADMIN_PASSWORD = 'PGVlasta'
 
 export async function POST(request) {
   try {
@@ -13,20 +15,8 @@ export async function POST(request) {
       )
     }
 
-    const admin = await prisma.admin.findUnique({
-      where: { username }
-    })
-
-    if (!admin) {
-      return NextResponse.json(
-        { error: 'Nesprávné přihlašovací údaje' },
-        { status: 401 }
-      )
-    }
-
-    const validPassword = await bcrypt.compare(password, admin.password)
-
-    if (!validPassword) {
+    // Check against hardcoded credentials
+    if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
       return NextResponse.json(
         { error: 'Nesprávné přihlašovací údaje' },
         { status: 401 }
@@ -36,8 +26,8 @@ export async function POST(request) {
     return NextResponse.json({ 
       success: true,
       admin: {
-        id: admin.id,
-        username: admin.username
+        id: 1,
+        username: username
       }
     })
   } catch (error) {
