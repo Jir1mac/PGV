@@ -50,13 +50,27 @@ export default function Videa() {
             title={title}
           />
         ) : item.embed ? (
-          <div dangerouslySetInnerHTML={{ __html: item.embed }} />
+          // Parse the embed code to extract iframe src safely instead of using dangerouslySetInnerHTML
+          <iframe
+            src={extractIframeSrc(item.embed)}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title={title}
+          />
         ) : (
           <div style={{ padding: '36% 0', background: '#111' }}></div>
         )}
         <div className="video-title">{title}</div>
       </div>
     )
+  }
+
+  const extractIframeSrc = (embedCode) => {
+    if (!embedCode) return ''
+    // Safely extract src from iframe tag
+    const match = embedCode.match(/src=["']([^"']+)["']/)
+    return match ? match[1] : ''
   }
 
   return (

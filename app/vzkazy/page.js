@@ -85,7 +85,8 @@ export default function Vzkazy() {
 
   const handleDelete = (index) => {
     if (!isAdmin) {
-      alert('Pro smazání vzkazu se přihlaste jako admin.')
+      setStatus('Pro smazání vzkazu se přihlaste jako admin.')
+      setTimeout(() => setStatus(''), 3000)
       return
     }
 

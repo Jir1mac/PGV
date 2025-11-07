@@ -111,35 +111,6 @@ export default function Odkazy() {
           ))}
         </div>
       </main>
-      <style jsx>{`
-        .links-grid {
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 1.25rem;
-          align-items: start;
-          margin-top: 0.5rem;
-        }
-        .links-col h3 {
-          margin: 0 0 0.5rem 0;
-          font-size: 1rem;
-          color: var(--accent);
-          text-transform: uppercase;
-          letter-spacing: .04em;
-        }
-        .links-col ul {
-          margin: 0;
-          padding: 0;
-          list-style: none;
-        }
-        .links-col li { margin: 0.25rem 0; }
-        .links-col a { color: var(--accent); text-decoration: underline; }
-        @media (max-width: 1100px) {
-          .links-grid { grid-template-columns: repeat(3, 1fr); }
-        }
-        @media (max-width: 720px) {
-          .links-grid { grid-template-columns: 1fr; }
-        }
-      `}</style>
     </Layout>
   )
 }

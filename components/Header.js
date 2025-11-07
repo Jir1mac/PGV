@@ -50,7 +50,9 @@ export default function Header() {
       setShowPopover(false)
       setPassword('')
       setError('')
-      alert('Přihlášení jako admin proběhlo.')
+      // Show success message instead of alert
+      setError('✓ Přihlášení úspěšné')
+      setTimeout(() => setError(''), 2000)
     } else {
       setError('Nesprávné heslo.')
     }
