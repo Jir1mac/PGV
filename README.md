@@ -18,7 +18,7 @@ This is a modern website built with Next.js framework.
 - `/clanky` - Articles page
 - `/videa` - Videos page with YouTube embeds
 - `/odkazy` - Useful links organized by categories
-- `/vzkazy` - Guestbook page 
+- `/vzkazy` - Guestbook page  
 
 ## Development
 
