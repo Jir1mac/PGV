@@ -3,7 +3,12 @@ import '../styles/globals.css'
 export const metadata = {
   title: 'PGV',
   description: 'PGV — Novinky, články a videa',
-}
+    icons: {
+            icon: '/favicon.ico'
+        }
+    }
+
+
 
 export default function RootLayout({ children }) {
   return (
