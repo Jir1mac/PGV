@@ -37,7 +37,7 @@ export default function ArticleDetail() {
     return date.toLocaleDateString('cs-CZ', { day: '2-digit', month: '2-digit', year: 'numeric' })
   }
 
-  // Simple markdown image parser
+  // Simple markdown image parser for backward compatibility
   const renderContent = (content) => {
     if (!content) return null
     
@@ -134,7 +134,41 @@ export default function ArticleDetail() {
           )}
 
           <div style={{ fontSize: '1.125rem', lineHeight: '1.7' }}>
-            {renderContent(article.content)}
+            {article.sections && article.sections.length > 0 ? (
+              // Render sections
+              article.sections.map((section, index) => (
+                <div key={section.id} style={{ marginBottom: '2.5rem' }}>
+                  <p style={{ whiteSpace: 'pre-wrap', marginBottom: '1.5rem' }}>
+                    {section.text}
+                  </p>
+                  {section.images && section.images.length > 0 && (
+                    <div style={{ 
+                      display: 'grid', 
+                      gap: '1rem',
+                      marginBottom: '1.5rem',
+                      gridTemplateColumns: section.images.length === 1 ? '1fr' : 'repeat(auto-fit, minmax(300px, 1fr))'
+                    }}>
+                      {section.images.map((image, imgIndex) => (
+                        <img 
+                          key={image.id}
+                          src={image.imageUrl} 
+                          alt={`Obrázek ${imgIndex + 1} sekce ${index + 1}`} 
+                          style={{ 
+                            width: '100%', 
+                            height: 'auto', 
+                            borderRadius: '8px',
+                            display: 'block'
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))
+            ) : (
+              // Fallback to old content rendering for backward compatibility
+              renderContent(article.content)
+            )}
           </div>
         </article>
       </main>

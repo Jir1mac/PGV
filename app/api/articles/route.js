@@ -4,6 +4,20 @@ import { prisma } from '@/lib/prisma'
 export async function GET() {
   try {
     const articles = await prisma.article.findMany({
+      include: {
+        sections: {
+          include: {
+            images: {
+              orderBy: {
+                order: 'asc'
+              }
+            }
+          },
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      },
       orderBy: { createdAt: 'desc' }
     })
     return NextResponse.json(articles)
@@ -18,17 +32,44 @@ export async function GET() {
 
 export async function POST(request) {
   try {
-    const { title, content, excerpt, imageUrl } = await request.json()
+    const { title, content, excerpt, imageUrl, sections } = await request.json()
 
-    if (!title || !content) {
+    if (!title) {
       return NextResponse.json(
-        { error: 'Vyplňte název a obsah článku' },
+        { error: 'Vyplňte název článku' },
         { status: 400 }
       )
     }
 
     const article = await prisma.article.create({
-      data: { title, content, excerpt, imageUrl }
+      data: { 
+        title, 
+        content: content || '', 
+        excerpt, 
+        imageUrl,
+        sections: sections ? {
+          create: sections.map((section, index) => ({
+            text: section.text,
+            order: index,
+            images: {
+              create: section.images.map((img, imgIndex) => ({
+                imageUrl: img.imageUrl,
+                order: imgIndex
+              }))
+            }
+          }))
+        } : undefined
+      },
+      include: {
+        sections: {
+          include: {
+            images: true
+          },
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
     })
 
     return NextResponse.json(article, { status: 201 })
