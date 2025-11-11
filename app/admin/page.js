@@ -11,6 +11,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [show, setShow] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (sessionStorage.getItem(ADMIN_SESSION_KEY)) {
@@ -21,6 +22,7 @@ export default function AdminLogin() {
   async function submit(e) {
     e.preventDefault()
     setError('')
+    setLoading(true)
     
     try {
       const response = await fetch('/api/auth', {
@@ -36,47 +38,71 @@ export default function AdminLogin() {
         router.push('/admin/dashboard')
       } else {
         setError(data.error || 'Nesprávné přihlašovací údaje')
+        setLoading(false)
       }
     } catch (err) {
       console.error('Login error:', err)
       setError('Chyba při přihlašování')
+      setLoading(false)
     }
   }
 
   return (
     <div className="admin-container">
       <div className="admin-card">
-        <h1>Přihlášení admin</h1>
+        <div className="admin-header">
+          <div className="admin-icon-wrap">
+            <span className="admin-shield-icon">🔒</span>
+          </div>
+          <h1>Administrátorské přihlášení</h1>
+          <p className="admin-subtitle">Zadejte své přihlašovací údaje</p>
+        </div>
 
         <form onSubmit={submit} className="admin-form">
-          <label>Uživatelské jméno</label>
-          <input
-            type="text"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            required
-          />
-
-          <label>Heslo</label>
-          <div className="admin-input-wrap">
+          <div className="form-group">
+            <label htmlFor="username">Uživatelské jméno</label>
             <input
-              type={show ? 'text' : 'password'}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              id="username"
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="Zadejte uživatelské jméno"
               required
+              autoComplete="username"
             />
-
-            <button
-              type="button"
-              className="admin-eye"
-              onClick={() => setShow(!show)}
-              aria-label="Zobrazit heslo"
-            >
-              👁
-            </button>
           </div>
 
-          {error && <div className="admin-error">{error}</div>}
+          <div className="form-group">
+            <label htmlFor="password">Heslo</label>
+            <div className="admin-input-wrap">
+              <input
+                id="password"
+                type={show ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Zadejte heslo"
+                required
+                autoComplete="current-password"
+              />
+
+              <button
+                type="button"
+                className="admin-eye"
+                onClick={() => setShow(!show)}
+                aria-label="Zobrazit heslo"
+                tabIndex="-1"
+              >
+                {show ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="admin-error" role="alert">
+              <span className="error-icon">⚠️</span>
+              {error}
+            </div>
+          )}
 
           <div className="admin-actions">
             <button
@@ -87,12 +113,17 @@ export default function AdminLogin() {
                 setPassword('')
                 setError('')
               }}
+              disabled={loading}
             >
               Zrušit
             </button>
 
-            <button type="submit" className="btn-primary">
-              Přihlásit
+            <button 
+              type="submit" 
+              className="btn-primary"
+              disabled={loading}
+            >
+              {loading ? 'Přihlašování...' : 'Přihlásit'}
             </button>
           </div>
         </form>
