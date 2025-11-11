@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { writeFile } from 'fs/promises'
+import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 
 export async function POST(request) {
@@ -58,7 +58,20 @@ export async function POST(request) {
     const timestamp = Date.now()
     const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
     const filename = `${timestamp}-${originalName}`
-    const filepath = join(process.cwd(), 'public', 'images', filename)
+    
+    // Ensure the images directory exists
+    const imagesDir = join(process.cwd(), 'public', 'images')
+    try {
+      await mkdir(imagesDir, { recursive: true })
+    } catch (error) {
+      console.error('Error creating images directory:', error)
+      return NextResponse.json(
+        { error: 'Chyba při vytváření adresáře pro obrázky' },
+        { status: 500 }
+      )
+    }
+
+    const filepath = join(imagesDir, filename)
 
     // Write file
     try {
