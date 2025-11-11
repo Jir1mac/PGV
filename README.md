@@ -11,7 +11,7 @@ This is a modern website built with Next.js framework.
 - Guestbook functionality (localStorage)
 - Video gallery with YouTube embeds
 - Admin authentication 
-
+  
 ## Pages 
 
 - `/` - Home page with hero section and recent articles
