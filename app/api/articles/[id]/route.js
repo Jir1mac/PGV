@@ -1,6 +1,38 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export async function GET(request, { params }) {
+  try {
+    const id = parseInt(params.id)
+    
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: 'Neplatné ID článku' },
+        { status: 400 }
+      )
+    }
+    
+    const article = await prisma.article.findUnique({
+      where: { id }
+    })
+
+    if (!article) {
+      return NextResponse.json(
+        { error: 'Článek nenalezen' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json(article)
+  } catch (error) {
+    console.error('Error fetching article:', error)
+    return NextResponse.json(
+      { error: 'Chyba při načítání článku' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function DELETE(request, { params }) {
   try {
     const id = parseInt(params.id)

@@ -133,12 +133,28 @@ export default function VideosManagement() {
 
           <div className="admin-actions">
             {editingId && (
-              <button type="button" className="btn-ghost" onClick={handleCancel}>
+              <button 
+                type="button" 
+                className="btn-ghost" 
+                onClick={handleCancel}
+                style={{ 
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem'
+                }}
+              >
                 Zrušit
               </button>
             )}
-            <button type="submit" className="btn-primary">
-              {editingId ? 'Aktualizovat' : 'Přidat video'}
+            <button 
+              type="submit" 
+              className="btn-primary"
+              style={{ 
+                padding: '0.75rem 1.5rem',
+                fontSize: '1rem',
+                fontWeight: '600'
+              }}
+            >
+              {editingId ? '✓ Aktualizovat video' : '+ Přidat video'}
             </button>
           </div>
         </form>
@@ -163,7 +179,7 @@ export default function VideosManagement() {
                 }}
               >
                 <div>
-                  <strong>{video.title}</strong>
+                  <strong style={{ fontSize: '1.125rem' }}>{video.title}</strong>
                   <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
                     {video.url}
                   </div>
@@ -172,16 +188,31 @@ export default function VideosManagement() {
                   <button 
                     className="btn-ghost" 
                     onClick={() => handleEdit(video)}
-                    style={{ padding: '0.5rem 1rem' }}
+                    style={{ 
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
                   >
-                    Upravit
+                    ✏️ Upravit
                   </button>
                   <button 
                     className="btn-ghost" 
                     onClick={() => handleDelete(video.id)}
-                    style={{ padding: '0.5rem 1rem', color: 'crimson' }}
+                    style={{ 
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: 'crimson',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
                   >
-                    Smazat
+                    🗑️ Smazat
                   </button>
                 </div>
               </div>

@@ -52,14 +52,14 @@ export default function Clanky() {
                 )}
                 <div className="card-body">
                   <h3 className="card-title">
-                    <Link href="#">{article.title}</Link>
+                    <Link href={`/clanky/${article.id}`}>{article.title}</Link>
                   </h3>
                   {article.excerpt && (
                     <p className="card-excerpt">{article.excerpt}</p>
                   )}
                   <div className="card-meta">
                     <span>{formatDate(article.createdAt)}</span>
-                    <Link className="read-more" href="#">Číst dál →</Link>
+                    <Link className="read-more" href={`/clanky/${article.id}`}>Číst dál →</Link>
                   </div>
                 </div>
               </article>

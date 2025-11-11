@@ -81,7 +81,7 @@ export default function MessagesManagement() {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
                   <div>
-                    <strong>{msg.name}</strong>
+                    <strong style={{ fontSize: '1.125rem' }}>{msg.name}</strong>
                     <span style={{ marginLeft: '0.5rem', fontSize: '0.875rem', color: 'var(--muted)' }}>
                       — {new Date(msg.createdAt).toLocaleString('cs-CZ')}
                     </span>
@@ -89,9 +89,17 @@ export default function MessagesManagement() {
                   <button 
                     className="btn-ghost" 
                     onClick={() => handleDelete(msg.id)}
-                    style={{ padding: '0.5rem 1rem', color: 'crimson' }}
+                    style={{ 
+                      padding: '0.5rem 1rem',
+                      fontSize: '0.875rem',
+                      fontWeight: '500',
+                      color: 'crimson',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.25rem'
+                    }}
                   >
-                    Smazat
+                    🗑️ Smazat
                   </button>
                 </div>
                 <div style={{ marginTop: '0.5rem', whiteSpace: 'pre-wrap' }}>
