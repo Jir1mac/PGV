@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -16,6 +16,9 @@ export default function ArticlesManagement() {
   const [imageUrl, setImageUrl] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [message, setMessage] = useState('')
+  const [showImageUrlInput, setShowImageUrlInput] = useState(false)
+  const [tempImageUrl, setTempImageUrl] = useState('')
+  const contentTextareaRef = useRef(null)
 
   useEffect(() => {
     if (!sessionStorage.getItem(ADMIN_SESSION_KEY)) {
@@ -103,6 +106,33 @@ export default function ArticlesManagement() {
     setMessage('')
   }
 
+  const insertImageAtCursor = () => {
+    if (!tempImageUrl.trim()) {
+      setMessage('Zadejte URL obrázku')
+      return
+    }
+
+    const textarea = contentTextareaRef.current
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const imageMarkdown = `\n![Obrázek](${tempImageUrl})\n`
+    
+    const newContent = content.substring(0, start) + imageMarkdown + content.substring(end)
+    setContent(newContent)
+    setTempImageUrl('')
+    setShowImageUrlInput(false)
+    setMessage('Obrázek vložen do textu')
+    
+    // Focus back on textarea
+    setTimeout(() => {
+      textarea.focus()
+      const newPosition = start + imageMarkdown.length
+      textarea.setSelectionRange(newPosition, newPosition)
+    }, 0)
+  }
+
   return (
     <div className="admin-container">
       <div className="admin-card" style={{ maxWidth: '900px' }}>
@@ -124,12 +154,71 @@ export default function ArticlesManagement() {
 
           <div className="form-row">
             <label>Obsah článku</label>
+            <div style={{ marginBottom: '0.5rem' }}>
+              <button 
+                type="button" 
+                className="btn-ghost" 
+                onClick={() => setShowImageUrlInput(!showImageUrlInput)}
+                style={{ padding: '0.5rem 1rem', marginBottom: '0.5rem' }}
+              >
+                📷 Vložit obrázek
+              </button>
+            </div>
+            {showImageUrlInput && (
+              <div style={{ 
+                marginBottom: '0.75rem', 
+                padding: '0.75rem', 
+                border: '1px solid var(--border)', 
+                borderRadius: '6px',
+                backgroundColor: 'var(--card-bg)'
+              }}>
+                <label style={{ fontSize: '0.875rem', marginBottom: '0.5rem', display: 'block' }}>
+                  URL obrázku
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={tempImageUrl}
+                    onChange={(e) => setTempImageUrl(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    style={{ flex: 1 }}
+                  />
+                  <button 
+                    type="button" 
+                    className="btn-primary" 
+                    onClick={insertImageAtCursor}
+                    style={{ padding: '0.5rem 1rem' }}
+                  >
+                    Vložit
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-ghost" 
+                    onClick={() => {
+                      setShowImageUrlInput(false)
+                      setTempImageUrl('')
+                    }}
+                    style={{ padding: '0.5rem 1rem' }}
+                  >
+                    Zrušit
+                  </button>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                  Obrázek bude vložen do textu na pozici kurzoru
+                </div>
+              </div>
+            )}
             <textarea
+              ref={contentTextareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              rows="10"
+              rows="15"
               required
+              placeholder="Zde pište obsah článku. Pro vložení obrázku použijte tlačítko výše."
             />
+            <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+              💡 Tip: Můžete vkládat více obrázků do textu postupně pomocí tlačítka &quot;Vložit obrázek&quot;
+            </div>
           </div>
 
           <div className="form-row">
@@ -142,13 +231,16 @@ export default function ArticlesManagement() {
           </div>
 
           <div className="form-row">
-            <label>URL obrázku</label>
+            <label>URL hlavního obrázku (náhled)</label>
             <input
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://..."
             />
+            <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+              Tento obrázek se zobrazí jako náhled článku na hlavní stránce
+            </div>
           </div>
 
           {message && (
@@ -159,12 +251,28 @@ export default function ArticlesManagement() {
 
           <div className="admin-actions">
             {editingId && (
-              <button type="button" className="btn-ghost" onClick={handleCancel}>
+              <button 
+                type="button" 
+                className="btn-ghost" 
+                onClick={handleCancel}
+                style={{ 
+                  padding: '0.75rem 1.5rem',
+                  fontSize: '1rem'
+                }}
+              >
                 Zrušit
               </button>
             )}
-            <button type="submit" className="btn-primary">
-              {editingId ? 'Aktualizovat' : 'Přidat článek'}
+            <button 
+              type="submit" 
+              className="btn-primary"
+              style={{ 
+                padding: '0.75rem 1.5rem',
+                fontSize: '1rem',
+                fontWeight: '600'
+              }}
+            >
+              {editingId ? '✓ Aktualizovat článek' : '+ Přidat článek'}
             </button>
           </div>
         </form>
@@ -186,21 +294,36 @@ export default function ArticlesManagement() {
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
-                  <strong>{article.title}</strong>
+                  <strong style={{ fontSize: '1.125rem' }}>{article.title}</strong>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button 
                       className="btn-ghost" 
                       onClick={() => handleEdit(article)}
-                      style={{ padding: '0.5rem 1rem' }}
+                      style={{ 
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
                     >
-                      Upravit
+                      ✏️ Upravit
                     </button>
                     <button 
                       className="btn-ghost" 
                       onClick={() => handleDelete(article.id)}
-                      style={{ padding: '0.5rem 1rem', color: 'crimson' }}
+                      style={{ 
+                        padding: '0.5rem 1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: 'crimson',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem'
+                      }}
                     >
-                      Smazat
+                      🗑️ Smazat
                     </button>
                   </div>
                 </div>

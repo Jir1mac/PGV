@@ -58,10 +58,12 @@ export default function Vzkazy() {
       })
 
       if (res.ok) {
+        const newEntry = await res.json()
         setName('')
         setMessage('')
         setStatus('Vzkaz odeslán.')
-        loadEntries()
+        // Immediately add the new message to the list for instant feedback
+        setEntries(prev => [newEntry, ...prev])
         
         setTimeout(() => {
           setStatus('')
