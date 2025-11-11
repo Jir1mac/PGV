@@ -223,6 +223,19 @@ export default function ArticlesManagement() {
     }
   }
 
+  // Validate URL to prevent XSS
+  const isValidImageUrl = (url) => {
+    if (!url) return false
+    try {
+      const urlObj = new URL(url, window.location.origin)
+      // Only allow http, https, and relative URLs
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:' || url.startsWith('/')
+    } catch {
+      // If URL parsing fails, check if it's a relative path
+      return url.startsWith('/')
+    }
+  }
+
   return (
     <div className="admin-container">
       <div className="admin-card" style={{ maxWidth: '900px' }}>
@@ -275,7 +288,7 @@ export default function ArticlesManagement() {
               placeholder="https://..."
               disabled={uploadingPreview}
             />
-            {imageUrl && (
+            {imageUrl && isValidImageUrl(imageUrl) && (
               <div style={{ marginTop: '0.75rem' }}>
                 <img 
                   src={imageUrl} 
@@ -289,6 +302,7 @@ export default function ArticlesManagement() {
                   onError={(e) => {
                     e.target.style.display = 'none'
                   }}
+                  referrerPolicy="no-referrer"
                 />
               </div>
             )}
