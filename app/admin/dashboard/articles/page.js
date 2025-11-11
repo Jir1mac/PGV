@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
@@ -11,14 +11,12 @@ export default function ArticlesManagement() {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
   const [excerpt, setExcerpt] = useState('')
   const [imageUrl, setImageUrl] = useState('')
+  const [sections, setSections] = useState([{ text: '', images: [] }])
   const [editingId, setEditingId] = useState(null)
   const [message, setMessage] = useState('')
-  const [showImageUrlInput, setShowImageUrlInput] = useState(false)
-  const [tempImageUrl, setTempImageUrl] = useState('')
-  const contentTextareaRef = useRef(null)
+  const [uploadingSection, setUploadingSection] = useState(null)
 
   useEffect(() => {
     if (!sessionStorage.getItem(ADMIN_SESSION_KEY)) {
@@ -53,15 +51,21 @@ export default function ArticlesManagement() {
       const res = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content, excerpt, imageUrl })
+        body: JSON.stringify({ 
+          title, 
+          content: '', // Keep for backward compatibility
+          excerpt, 
+          imageUrl,
+          sections: sections.filter(s => s.text.trim())
+        })
       })
 
       if (res.ok) {
         setMessage(editingId ? 'Článek aktualizován' : 'Článek přidán')
         setTitle('')
-        setContent('')
         setExcerpt('')
         setImageUrl('')
+        setSections([{ text: '', images: [] }])
         setEditingId(null)
         loadArticles()
       } else {
@@ -77,9 +81,17 @@ export default function ArticlesManagement() {
   const handleEdit = (article) => {
     setEditingId(article.id)
     setTitle(article.title)
-    setContent(article.content)
     setExcerpt(article.excerpt || '')
     setImageUrl(article.imageUrl || '')
+    
+    if (article.sections && article.sections.length > 0) {
+      setSections(article.sections.map(section => ({
+        text: section.text,
+        images: section.images || []
+      })))
+    } else {
+      setSections([{ text: article.content || '', images: [] }])
+    }
   }
 
   const handleDelete = async (id) => {
@@ -100,37 +112,82 @@ export default function ArticlesManagement() {
   const handleCancel = () => {
     setEditingId(null)
     setTitle('')
-    setContent('')
     setExcerpt('')
     setImageUrl('')
+    setSections([{ text: '', images: [] }])
     setMessage('')
   }
 
-  const insertImageAtCursor = () => {
-    if (!tempImageUrl.trim()) {
-      setMessage('Zadejte URL obrázku')
+  const addSection = () => {
+    setSections([...sections, { text: '', images: [] }])
+  }
+
+  const removeSection = (index) => {
+    if (sections.length === 1) {
+      setMessage('Článek musí mít alespoň jednu sekci')
       return
     }
+    const newSections = sections.filter((_, i) => i !== index)
+    setSections(newSections)
+  }
 
-    const textarea = contentTextareaRef.current
-    if (!textarea) return
+  const updateSectionText = (index, text) => {
+    const newSections = [...sections]
+    newSections[index].text = text
+    setSections(newSections)
+  }
 
-    const start = textarea.selectionStart
-    const end = textarea.selectionEnd
-    const imageMarkdown = `\n![Obrázek](${tempImageUrl})\n`
-    
-    const newContent = content.substring(0, start) + imageMarkdown + content.substring(end)
-    setContent(newContent)
-    setTempImageUrl('')
-    setShowImageUrlInput(false)
-    setMessage('Obrázek vložen do textu')
-    
-    // Focus back on textarea
-    setTimeout(() => {
-      textarea.focus()
-      const newPosition = start + imageMarkdown.length
-      textarea.setSelectionRange(newPosition, newPosition)
-    }, 0)
+  const handleImageUpload = async (sectionIndex, e) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploadingSection(sectionIndex)
+    setMessage('Nahrávám obrázky...')
+
+    try {
+      const uploadedImages = []
+      
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('file', file)
+        
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+        
+        if (res.ok) {
+          const data = await res.json()
+          uploadedImages.push({ imageUrl: data.imageUrl })
+        } else {
+          const error = await res.json()
+          setMessage(error.error || 'Chyba při nahrávání')
+          setUploadingSection(null)
+          return
+        }
+      }
+
+      const newSections = [...sections]
+      newSections[sectionIndex].images = [
+        ...newSections[sectionIndex].images,
+        ...uploadedImages
+      ]
+      setSections(newSections)
+      setMessage(`${uploadedImages.length} obrázek(ů) nahráno`)
+    } catch (err) {
+      console.error('Error uploading images:', err)
+      setMessage('Chyba při nahrávání obrázků')
+    } finally {
+      setUploadingSection(null)
+    }
+  }
+
+  const removeImage = (sectionIndex, imageIndex) => {
+    const newSections = [...sections]
+    newSections[sectionIndex].images = newSections[sectionIndex].images.filter(
+      (_, i) => i !== imageIndex
+    )
+    setSections(newSections)
   }
 
   return (
@@ -150,75 +207,6 @@ export default function ArticlesManagement() {
               onChange={(e) => setTitle(e.target.value)}
               required
             />
-          </div>
-
-          <div className="form-row">
-            <label>Obsah článku</label>
-            <div style={{ marginBottom: '0.5rem' }}>
-              <button 
-                type="button" 
-                className="btn-ghost" 
-                onClick={() => setShowImageUrlInput(!showImageUrlInput)}
-                style={{ padding: '0.5rem 1rem', marginBottom: '0.5rem' }}
-              >
-                📷 Vložit obrázek
-              </button>
-            </div>
-            {showImageUrlInput && (
-              <div style={{ 
-                marginBottom: '0.75rem', 
-                padding: '0.75rem', 
-                border: '1px solid var(--border)', 
-                borderRadius: '6px',
-                backgroundColor: 'var(--card-bg)'
-              }}>
-                <label style={{ fontSize: '0.875rem', marginBottom: '0.5rem', display: 'block' }}>
-                  URL obrázku
-                </label>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
-                    type="text"
-                    value={tempImageUrl}
-                    onChange={(e) => setTempImageUrl(e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                    style={{ flex: 1 }}
-                  />
-                  <button 
-                    type="button" 
-                    className="btn-primary" 
-                    onClick={insertImageAtCursor}
-                    style={{ padding: '0.5rem 1rem' }}
-                  >
-                    Vložit
-                  </button>
-                  <button 
-                    type="button" 
-                    className="btn-ghost" 
-                    onClick={() => {
-                      setShowImageUrlInput(false)
-                      setTempImageUrl('')
-                    }}
-                    style={{ padding: '0.5rem 1rem' }}
-                  >
-                    Zrušit
-                  </button>
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
-                  Obrázek bude vložen do textu na pozici kurzoru
-                </div>
-              </div>
-            )}
-            <textarea
-              ref={contentTextareaRef}
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows="15"
-              required
-              placeholder="Zde pište obsah článku. Pro vložení obrázku použijte tlačítko výše."
-            />
-            <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
-              💡 Tip: Můžete vkládat více obrázků do textu postupně pomocí tlačítka &quot;Vložit obrázek&quot;
-            </div>
           </div>
 
           <div className="form-row">
@@ -242,6 +230,128 @@ export default function ArticlesManagement() {
               Tento obrázek se zobrazí jako náhled článku na hlavní stránce
             </div>
           </div>
+
+          <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <label style={{ margin: 0, fontSize: '1.125rem', fontWeight: '600' }}>
+                Sekce článku
+              </label>
+              <button 
+                type="button" 
+                className="btn-primary" 
+                onClick={addSection}
+                style={{ padding: '0.5rem 1rem' }}
+              >
+                + Přidat sekci
+              </button>
+            </div>
+            <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '1rem' }}>
+              Každá sekce může obsahovat text a více obrázků. Můžete přidávat neomezeně sekcí.
+            </div>
+          </div>
+
+          {sections.map((section, index) => (
+            <div 
+              key={index}
+              style={{ 
+                padding: '1.5rem', 
+                border: '2px solid var(--border)', 
+                borderRadius: '8px',
+                marginBottom: '1.5rem',
+                backgroundColor: 'var(--card-bg)'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <strong>Sekce {index + 1}</strong>
+                {sections.length > 1 && (
+                  <button 
+                    type="button" 
+                    className="btn-ghost" 
+                    onClick={() => removeSection(index)}
+                    style={{ 
+                      padding: '0.5rem 1rem',
+                      color: 'crimson',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    🗑️ Odebrat sekci
+                  </button>
+                )}
+              </div>
+
+              <div className="form-row">
+                <label>Text sekce</label>
+                <textarea
+                  value={section.text}
+                  onChange={(e) => updateSectionText(index, e.target.value)}
+                  rows="8"
+                  placeholder="Napište text této sekce..."
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <label>Obrázky sekce</label>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  multiple
+                  onChange={(e) => handleImageUpload(index, e)}
+                  disabled={uploadingSection === index}
+                  style={{ marginBottom: '1rem' }}
+                />
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '1rem' }}>
+                  Můžete vybrat více obrázků najednou. Maximum 5MB na obrázek. Povolené formáty: JPG, PNG, GIF, WEBP
+                </div>
+
+                {section.images.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+                    {section.images.map((image, imgIndex) => (
+                      <div 
+                        key={imgIndex}
+                        style={{ 
+                          position: 'relative',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        <img 
+                          src={image.imageUrl} 
+                          alt={`Obrázek ${imgIndex + 1}`}
+                          style={{ 
+                            width: '100%', 
+                            height: '150px', 
+                            objectFit: 'cover',
+                            display: 'block'
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index, imgIndex)}
+                          style={{
+                            position: 'absolute',
+                            top: '0.5rem',
+                            right: '0.5rem',
+                            backgroundColor: 'rgba(220, 38, 38, 0.9)',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '0.25rem 0.5rem',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: '600'
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
 
           {message && (
             <div style={{ marginBottom: '1rem', color: message.includes('Chyba') ? 'crimson' : 'green' }}>
@@ -330,6 +440,11 @@ export default function ArticlesManagement() {
                 {article.excerpt && (
                   <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
                     {article.excerpt}
+                  </div>
+                )}
+                {article.sections && article.sections.length > 0 && (
+                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.5rem' }}>
+                    {article.sections.length} sekce
                   </div>
                 )}
               </div>

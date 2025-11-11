@@ -13,7 +13,21 @@ export async function GET(request, { params }) {
     }
     
     const article = await prisma.article.findUnique({
-      where: { id }
+      where: { id },
+      include: {
+        sections: {
+          include: {
+            images: {
+              orderBy: {
+                order: 'asc'
+              }
+            }
+          },
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
     })
 
     if (!article) {
@@ -69,11 +83,45 @@ export async function PUT(request, { params }) {
       )
     }
     
-    const { title, content, excerpt, imageUrl } = await request.json()
+    const { title, content, excerpt, imageUrl, sections } = await request.json()
+
+    // Delete existing sections if new sections are provided
+    if (sections) {
+      await prisma.articleSection.deleteMany({
+        where: { articleId: id }
+      })
+    }
 
     const article = await prisma.article.update({
       where: { id },
-      data: { title, content, excerpt, imageUrl }
+      data: { 
+        title, 
+        content: content || '', 
+        excerpt, 
+        imageUrl,
+        sections: sections ? {
+          create: sections.map((section, index) => ({
+            text: section.text,
+            order: index,
+            images: {
+              create: section.images.map((img, imgIndex) => ({
+                imageUrl: img.imageUrl,
+                order: imgIndex
+              }))
+            }
+          }))
+        } : undefined
+      },
+      include: {
+        sections: {
+          include: {
+            images: true
+          },
+          orderBy: {
+            order: 'asc'
+          }
+        }
+      }
     })
 
     return NextResponse.json(article)
