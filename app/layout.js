@@ -4,7 +4,7 @@ export const metadata = {
   title: 'PGV',
   description: 'PGV — Novinky, články a videa',
     icons: {
-            icon: '/favicon.ico'
+            icon: 'public/favicon.ico'
         }
     }
 
