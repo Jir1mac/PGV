@@ -17,6 +17,7 @@ export default function ArticlesManagement() {
   const [editingId, setEditingId] = useState(null)
   const [message, setMessage] = useState('')
   const [uploadingSection, setUploadingSection] = useState(null)
+  const [uploadingPreview, setUploadingPreview] = useState(false)
 
   useEffect(() => {
     if (!sessionStorage.getItem(ADMIN_SESSION_KEY)) {
@@ -190,6 +191,51 @@ export default function ArticlesManagement() {
     setSections(newSections)
   }
 
+  const handlePreviewImageUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploadingPreview(true)
+    setMessage('Nahrávám náhledový obrázek...')
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (res.ok) {
+        const data = await res.json()
+        setImageUrl(data.imageUrl)
+        setMessage('Náhledový obrázek nahrán')
+      } else {
+        const error = await res.json()
+        setMessage(error.error || 'Chyba při nahrávání náhledového obrázku')
+      }
+    } catch (err) {
+      console.error('Error uploading preview image:', err)
+      setMessage('Chyba při nahrávání náhledového obrázku')
+    } finally {
+      setUploadingPreview(false)
+    }
+  }
+
+  // Validate URL to prevent XSS
+  const isValidImageUrl = (url) => {
+    if (!url) return false
+    try {
+      const urlObj = new URL(url, window.location.origin)
+      // Only allow http, https, and relative URLs
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:' || url.startsWith('/')
+    } catch {
+      // If URL parsing fails, check if it's a relative path
+      return url.startsWith('/')
+    }
+  }
+
   return (
     <div className="admin-container">
       <div className="admin-card" style={{ maxWidth: '900px' }}>
@@ -219,16 +265,47 @@ export default function ArticlesManagement() {
           </div>
 
           <div className="form-row">
-            <label>URL hlavního obrázku (náhled)</label>
+            <label>Náhledový obrázek (zobrazuje se na hlavní stránce)</label>
+            <div style={{ marginBottom: '0.5rem' }}>
+              <input
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                onChange={handlePreviewImageUpload}
+                disabled={uploadingPreview}
+                style={{ marginBottom: '0.5rem' }}
+              />
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
+                Nahrajte obrázek z počítače (max 5MB, formáty: JPG, PNG, GIF, WEBP)
+              </div>
+            </div>
+            <div style={{ fontSize: '0.875rem', color: 'var(--muted)', marginBottom: '0.5rem' }}>
+              nebo zadejte URL:
+            </div>
             <input
               type="text"
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="https://..."
+              disabled={uploadingPreview}
             />
-            <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
-              Tento obrázek se zobrazí jako náhled článku na hlavní stránce
-            </div>
+            {imageUrl && isValidImageUrl(imageUrl) && (
+              <div style={{ marginTop: '0.75rem' }}>
+                <img 
+                  src={imageUrl} 
+                  alt="Náhled" 
+                  style={{ 
+                    maxWidth: '200px', 
+                    maxHeight: '200px', 
+                    borderRadius: '8px',
+                    border: '1px solid var(--border)'
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                  }}
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            )}
           </div>
 
           <div style={{ marginTop: '2rem', marginBottom: '1rem' }}>
