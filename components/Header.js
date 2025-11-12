@@ -10,6 +10,7 @@ export default function Header() {
 
   const [isAdmin, setIsAdmin] = useState(false)
   const [theme, setTheme] = useState('light')
+  const [isNavOpen, setIsNavOpen] = useState(false)
 
   const ADMIN_SESSION_KEY = 'pgv-admin'
   const THEME_KEY = 'pgv-theme'
@@ -34,6 +35,24 @@ export default function Header() {
     }
   }, [])
 
+  useEffect(() => {
+    // Toggle nav-open class on body element
+    if (isNavOpen) {
+      document.body.classList.add('nav-open')
+    } else {
+      document.body.classList.remove('nav-open')
+    }
+
+    // Clean up on unmount
+    return () => {
+      document.body.classList.remove('nav-open')
+    }
+  }, [isNavOpen])
+
+  const toggleNav = () => {
+    setIsNavOpen(!isNavOpen)
+  }
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
@@ -49,6 +68,11 @@ export default function Header() {
     { href: '/vzkazy', label: 'Vzkazy' },
   ]
 
+  const handleNavClick = () => {
+    // Close mobile menu when a nav link is clicked
+    setIsNavOpen(false)
+  }
+
   return (
     <header className="site-header" role="banner">
       <div className="header-left">
@@ -57,9 +81,10 @@ export default function Header() {
 
       <button 
         className="nav-toggle" 
-        aria-expanded="false" 
+        aria-expanded={isNavOpen} 
         aria-controls="main-nav" 
-        aria-label="Otevřít navigaci"
+        aria-label={isNavOpen ? "Zavřít navigaci" : "Otevřít navigaci"}
+        onClick={toggleNav}
       >
         <span className="hamburger" aria-hidden="true"></span>
       </button>
@@ -71,6 +96,7 @@ export default function Header() {
               <Link 
                 href={item.href}
                 aria-current={pathname === item.href ? 'page' : undefined}
+                onClick={handleNavClick}
               >
                 {item.label}
               </Link>
