@@ -237,6 +237,14 @@ body.nav-open .hamburger::after{display:none}
 .hero-content .lead{color:var(--hero-subtext);margin-top:0.5rem;max-width:48ch}
 .hero-content h1, .hero-content .lead { transition: color .25s ease, text-shadow .25s ease }
 
+/* Hero CTA buttons container - add spacing between buttons */
+.hero-ctas{
+  display:flex;
+  gap:1rem;
+  margin-top:1.5rem;
+  flex-wrap:wrap;
+}
+
 /* CTA: adapt background and text color based on theme variables */
 .btn{
   display:inline-block;
