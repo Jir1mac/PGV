@@ -90,7 +90,7 @@ export default function Odkazy() {
 
   return (
     <Layout>
-      <main className="container">
+     <main className="container page-odkazy">
         <h1>Odkazy</h1>
         <p className="lead">Užitečné odkazy a zdroje — přehledně rozdělené do kategorií.</p>
 
