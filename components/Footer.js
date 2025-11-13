@@ -19,7 +19,7 @@ export default function Footer() {
 
       <div className="footer-bottom">
         <p>
-          Vytvořil <a href="https://jiri-macal.web.educhem.it/" target="_blank" rel="noopener">Jiří Macal</a>
+          Vytvořil <a href="https://www.jirimacal.cz" target="_blank" rel="noopener">Jiří Macal</a>
         </p>
         <p>&copy; PGV • Všechna práva vyhrazena</p>
       </div>
