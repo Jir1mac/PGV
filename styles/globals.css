@@ -764,16 +764,18 @@ button,
 }
 
 /* --- Full-page background za celou stránkou Odkazy --- */
-.page-odkazy {
- background-image: linear-gradient(to bottom, rgba(0,0,0,0.12), rgba(0,0,0,0.02)), url("/images/odkazy.jpg");
-  background-size: cover;        /* obrazek zaplní plochu */
-  background-position: center top;
+.page-odkazy-wrapper {
+  background-image: linear-gradient(to bottom, rgba(0,0,0,0.12), rgba(0,0,0,0.02)), url("/images/odkazy.jpg");
+  background-size: 120%;        /* zvětšený obrazek pro pokrytí celé plochy */
+  background-position: center 35%;
   background-repeat: no-repeat;
   background-attachment: fixed;  /* na mobilu změnit na scroll */
   color: var(--text);
+  min-height: calc(100vh - var(--header-height, 60px) - var(--footer-height, 200px));
+  padding: 2rem 0;
 }
 @media (max-width:760px){
-  .page-odkazy { background-attachment: scroll; }
+  .page-odkazy-wrapper { background-attachment: scroll; }
 }
 .links-col {
   background: linear-gradient(to bottom, rgba(255,255,255,0.06), rgba(255,255,255,0.02));

@@ -90,27 +90,29 @@ export default function Odkazy() {
 
   return (
     <Layout>
-     <main className="container page-odkazy">
-        <h1>Odkazy</h1>
-        <p className="lead">Užitečné odkazy a zdroje — přehledně rozdělené do kategorií.</p>
+      <div className="page-odkazy-wrapper">
+        <main className="container">
+          <h1>Odkazy</h1>
+          <p className="lead">Užitečné odkazy a zdroje — přehledně rozdělené do kategorií.</p>
 
-        <div className="links-grid" role="list">
-          {linkCategories.map((category) => (
-            <section key={category.id} className="links-col" aria-labelledby={category.id}>
-              <h3 id={category.id}>{category.title}</h3>
-              <ul>
-                {category.links.map((link, index) => (
-                  <li key={index}>
-                    <a href={link.href} target="_blank" rel="noopener">
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      </main>
+          <div className="links-grid" role="list">
+            {linkCategories.map((category) => (
+              <section key={category.id} className="links-col" aria-labelledby={category.id}>
+                <h3 id={category.id}>{category.title}</h3>
+                <ul>
+                  {category.links.map((link, index) => (
+                    <li key={index}>
+                      <a href={link.href} target="_blank" rel="noopener">
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        </main>
+      </div>
     </Layout>
   )
 }
