@@ -11,14 +11,19 @@ export default function Home() {
   const [loadingArticles, setLoadingArticles] = useState(true)
 
   useEffect(() => {
-    // Load recent guestbook entries
-    try {
-      const raw = localStorage.getItem('pgv-guestbook')
-      const entries = JSON.parse(raw || '[]')
-      setRecentGuestbook(entries.slice(0, 5))
-    } catch (e) {
-      console.error('Error loading guestbook', e)
+    // Load recent guestbook entries from API
+    const loadMessages = async () => {
+      try {
+        const res = await fetch('/api/messages', { cache: 'no-store' })
+        if (res.ok) {
+          const data = await res.json()
+          setRecentGuestbook(data.slice(0, 5))
+        }
+      } catch (e) {
+        console.error('Error loading guestbook', e)
+      }
     }
+    loadMessages()
 
     // Load articles from API
     const loadArticles = async () => {
